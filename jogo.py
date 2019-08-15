@@ -25,6 +25,15 @@ class Jogo:
         r.shuffle(baralho)
         return Fila(baralho)
 
+    def checa_vitoria(self):
+        for _, pilha_build in self.build_piles:
+            carta_top = pilha_build.get_top()
+            if carta_top is None:
+                return False
+            if carta_top.valor != "K":
+                return False
+        return True
+
     def gera_tableau(self):
         tableau = []
         for i in range(1, 8):
@@ -73,11 +82,14 @@ class Jogo:
         dic_index = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6}
         index_lista = dic_index[letra_lista]
         lista_especifica = self.tableau[index_lista]
+        valid_indexes = []
         for index, value in enumerate(lista_especifica):
             if not value.is_hidden():
                 print(index, "- [" + value.valor, "de", value.naipe, ";", value.cor + "]")
+                valid_indexes.append(str(index))
             else:
                 print("Hidden")
+        return valid_indexes
 
     def get_last_tableau(self, index):
         dic_index = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6}
@@ -86,7 +98,8 @@ class Jogo:
             return None
         ultima_carta = self.tableau[index_lista].pop()    
         lista_especifica = self.tableau[index_lista]
-        lista_especifica[-1].make_visible()
+        if len(lista_especifica) > 0:
+            lista_especifica[-1].make_visible()
         return ultima_carta
     
     def compra_carta(self):
@@ -161,9 +174,12 @@ class Jogo:
         if letra_lista not in {"A", "B", "C", "D", "E", "F", "G"}:
             print("Letra invalida")
             return False
-        dic_index = {"A":0, "B":1, "C":2, "D":3, "E":4, "F":5, "G":6}
+        dic_index = {"A": 0, "B": 1, "C": 2, "D": 3, "E": 4, "F": 5, "G": 6}
         index_lista = dic_index[letra_lista]
         lista_especifica = self.tableau[index_lista]
+        if len(lista_especifica) == 0:
+            lista_especifica.append(carta)
+            return True
         ultimo_valor = lista_especifica[-1]
         if self.check_prior_tableau(ultimo_valor, carta):
             lista_especifica.append(carta)
@@ -181,6 +197,9 @@ class Jogo:
 
     def menu(self):
         while True:
+            if self.checa_vitoria():
+                print("Você ganhou o jogo! Parabens!")
+                break
             self.print_game()
             print("\nSelecione um area do Tabuleiro: \n1 - Draw Pile\n2 - Build Pile\n3 - Tableau")
             opt = input("\nComando: ")
@@ -207,8 +226,15 @@ class Jogo:
                                 letra = input("\nLista: ")
                                 if self.insere_tableau(carta, letra):
                                     break
+                            else:
+                                print("Comando Invalido")
+                                continue
+
                     else:
                         print("Draw Pile vazio")
+                else:
+                    print("Comando Invalido")
+                    continue
             elif opt == "2":
                 print("\nOpções: \n1 - Mover Carta")
                 inside_opt = input("\nComando: ")
@@ -217,6 +243,7 @@ class Jogo:
                     naipe = input("\nComando: ")
                     if naipe not in {"0", "1", "2", "3"}:
                         print("naipe_invalido")
+                        continue
                     else:
                         carta = self.get_top_build_piles(int(naipe))
                         if carta is not None:
@@ -228,6 +255,15 @@ class Jogo:
                                     letra = input("\nLista: ")
                                     if self.insere_tableau(carta, letra):
                                         break
+                                else:
+                                    print("Comando Invalido")
+                                    continue
+                        else:
+                            print("Não há carta nessa pilha")
+                            continue
+                else:
+                    print("Comando Invalido")
+                    continue
             elif opt == "3":
                 print("\nSelecione uma lista (A - G):")
                 index_list = input("\nLista: ").upper()
@@ -239,16 +275,30 @@ class Jogo:
                     if place == "1":
                         carta = self.get_last_tableau(index_list)
                         self.insere_build_piles(carta)
+                    elif place == "2":
+                        while True:
+                            valid_indexes = self.printa_lista(index_list)
+                            print("\nSelecione a carta inicial da sequencia a ser movida: ")
+                            card_index = input("\nCarta: ")
+                            if card_index not in valid_indexes:
+                                print("index invalido")
+                                continue
+                            list_cards = self.get_list_of_cards(index_list, int(card_index))
+                            while True:
+                                print("\nSelecione uma lista (A - G) para mover a sequencia de cartas:\n")
+                                index_list = input("\nLista: ").upper()
+                                if index_list not in {"A", "B", "C", "D", "E", "F", "G"}:
+                                    print("Lista invalida")
+                                    continue
+                                break
+                            self.insere_tableau_lista(list_cards, index_list)
+                            break
                     else:
-                        self.printa_lista(index_list)
-                        print("\nSelecione a carta inicial da sequencia a ser movida: ")
-                        card_index = input("\nCarta: ")
-                        list_cards = self.get_list_of_cards(index_list, int(card_index))
-                        print("\nSelecione uma lista (A - G) para mover a sequencia de cartas:\n")
-                        index_list = input("\nLista: ").upper()
-                        if index_list not in {"A", "B", "C", "D", "E", "F", "G"}:
-                            print("Lista invalida")
-                        self.insere_tableau_lista(list_cards, index_list)
+                        print("Comando Invalido")
+                        continue
+            else:
+                print("Comando Invalido")
+                continue
 
 
 
