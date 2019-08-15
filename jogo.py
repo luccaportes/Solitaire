@@ -37,7 +37,8 @@ class Jogo:
         return tableau
 
     def print_game(self):
-        print(10*"#"+ "BUILD PILES" + 10*"#")
+        print("\n\n")
+        print(10*"#"+ " BUILD PILES " + 10*"#")
         for i in self.build_piles:
             naipe = i[0]
             carta = i[1].get_top()
@@ -45,13 +46,13 @@ class Jogo:
                 valor = carta.valor
                 naipe = carta.naipe
                 cor = carta.cor
-                print(naipe + ":" + str((valor, naipe, cor)), end="|")
+                print(naipe + ": " + str((valor, naipe, cor)), end="| ")
             else:
-                print(naipe + ":Empty", end="|")
+                print(naipe + ": Empty", end="| ")
 
-        print("\n")
+        print("\n\n")
 
-        print(10 * "#" + "TABLEAU" + 10 * "#")
+        print(10 * "#" + " TABLEAU " + 10 * "#")
         temp_list = []
         for i in range(20):
             inside_temp_list = []
@@ -83,8 +84,11 @@ class Jogo:
         index_lista = dic_index[index]
         if len(self.tableau[index_lista]) == 0:
             return None
-        return self.tableau[index_lista].pop()
-
+        ultima_carta = self.tableau[index_lista].pop()    
+        lista_especifica = self.tableau[index_lista]
+        lista_especifica[-1].make_visible()
+        return ultima_carta
+    
     def compra_carta(self):
         return self.draw_pile.pop()
 
@@ -178,20 +182,20 @@ class Jogo:
     def menu(self):
         while True:
             self.print_game()
-            print("Selecione um area do Tabuleiro: \n1 - Draw Pile\n2 - Build Pile\n3 - Tableau\n")
-            opt = input()
+            print("\nSelecione um area do Tabuleiro: \n1 - Draw Pile\n2 - Build Pile\n3 - Tableau")
+            opt = input("\nComando: ")
             if opt == "1":
-                print("Selecione a opção: \n1 - Comprar\n")
-                inside_opt = input()
+                print("\nOpções: \n1 - Comprar")
+                inside_opt = input("\nComando: ")
                 if inside_opt == "1":
                     carta = self.compra_carta()
                     if carta is not None:
                         carta.change_hidden_state()
                         while True:
                             self.print_game()
-                            print("Voce comprou a carta [" + carta.valor, "de", carta.naipe, ";" ,carta.cor + "]")
-                            print("O que deseja fazer?\n1 - Descartar\n2 - Colocar no Build Piles\n3 - Colocar no Tableau\n")
-                            inside_opt = input()
+                            print("\nVoce comprou a carta: [" + carta.valor, "de", carta.naipe, ";" ,carta.cor + "]")
+                            print("\nOpções: \n1 - Descartar\n2 - Colocar no Build Piles\n3 - Colocar no Tableau")
+                            inside_opt = input("\nComando: ")
                             if inside_opt == "1":
                                 self.descarta(carta)
                                 break
@@ -199,51 +203,49 @@ class Jogo:
                                 if self.insere_build_piles(carta):
                                     break
                             elif inside_opt == "3":
-                                print("deseja inserir em qual lista: (A - G) ")
-                                letra = input()
+                                print("\nSelecione uma lista para inserir: (A - G)")
+                                letra = input("\nLista: ")
                                 if self.insere_tableau(carta, letra):
                                     break
                     else:
                         print("Draw Pile vazio")
             elif opt == "2":
-                print("O que deseja fazer?\n1 - Retirar Carta\n")
-                inside_opt = input()
+                print("\nOpções: \n1 - Mover Carta")
+                inside_opt = input("\nComando: ")
                 if inside_opt == "1":
-                    print("Qual naipe? \n0 - Ouros\n1 - Copas\n2 - Espadas\n3 - Paus")
-                    naipe = input()
+                    print("\nSelecione o naipe: \n0 - Ouros\n1 - Copas\n2 - Espadas\n3 - Paus")
+                    naipe = input("\nComando: ")
                     if naipe not in {"0", "1", "2", "3"}:
                         print("naipe_invalido")
                     else:
                         carta = self.get_top_build_piles(int(naipe))
                         if carta is not None:
                             while True:
-                                print("O que deseja fazer?\n1 - Colocar no Tableau\n")
-                                inside_opt = input()
+                                print("\nOpções:v\n1 - Colocar no Tableau")
+                                inside_opt = input("\nComando: ")
                                 if inside_opt == "1":
-                                    print("deseja inserir em qual lista: (A - G) ")
-                                    letra = input()
+                                    print("\nSelecione uma lista para mover a carta: (A - G) ")
+                                    letra = input("\nLista: ")
                                     if self.insere_tableau(carta, letra):
                                         break
             elif opt == "3":
-                print("Selecione uma lista (A - G):\n")
-                index_list = input().upper()
+                print("\nSelecione uma lista (A - G):")
+                index_list = input("\nLista: ").upper()
                 if index_list not in {"A", "B", "C", "D", "E", "F", "G"}:
                     print("Lista invalida")
                 else:
-                    print("Onde deseja por?\n1 - Build piles\n2 - Tableau")
-                    place = input()
+                    print("\nOpções: \n1 - Mover carta para Build piles\n2 - Mover cartas para outra lista no Tableau")
+                    place = input("\nOpções: ")
                     if place == "1":
-                        print("Selecione uma lista (A - G):\n")
-                        index_list = input().upper()
                         carta = self.get_last_tableau(index_list)
                         self.insere_build_piles(carta)
                     else:
                         self.printa_lista(index_list)
-                        print("Selecione a partir de que carta quer pegar: ")
-                        card_index = input()
+                        print("\nSelecione a carta inicial da sequencia a ser movida: ")
+                        card_index = input("\nCarta: ")
                         list_cards = self.get_list_of_cards(index_list, int(card_index))
-                        print("Selecione uma lista (A - G) para por a carta:\n")
-                        index_list = input().upper()
+                        print("\nSelecione uma lista (A - G) para mover a sequencia de cartas:\n")
+                        index_list = input("\nLista: ").upper()
                         if index_list not in {"A", "B", "C", "D", "E", "F", "G"}:
                             print("Lista invalida")
                         self.insere_tableau_lista(list_cards, index_list)
